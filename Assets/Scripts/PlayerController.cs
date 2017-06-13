@@ -11,15 +11,15 @@ public class PlayerController : MonoBehaviour
     public AudioSource SFXP;
     //Movement
     public Rigidbody myBody;
+    public int LaneIndex = 1;
+    public float[] LaneZPostition;
+    public float SideSpeed;
     public float maxSpeed;
     public float moveAcceleration;
     public float jumpAcceleration;
     public float RCD;
     public Vector3 sidemov;
     private bool isGrounded = false;
-    private bool isLeft = false;
-    private bool isRight = false;
-    private bool isMiddle = true;
     //Misc
     public GameObject Menu;
     private bool IGO;
@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     {
         groundChecker();
         ConstantMove();
+        PlayerMover();
     }
     void groundChecker()
     {
@@ -40,6 +41,17 @@ public class PlayerController : MonoBehaviour
         ray.direction = Vector3.down;
         isGrounded = Physics.Raycast(ray, RCD);
     }
+    void LaneChooser ()
+    {
+	    if(Input.GetKeyDown(KeyCode.A) && LaneIndex > 0)
+        {
+            LaneIndex = LaneIndex - 1;
+        }
+        else if(Input.GetKeyDown(KeyCode.D) && LaneIndex < 2)
+        {
+            LaneIndex = LaneIndex + 1;
+        }
+	}
     void Update()
     {
         if (transform.position.y < GOH && IGO == false)
@@ -52,46 +64,13 @@ public class PlayerController : MonoBehaviour
         {
             Jump();
         }
-        if (isMiddle && (Input.GetKeyDown(KeyCode.LeftArrow)))
-        {
-            sidemov.x = sidemov.x - 2f;
-            sidemov.y = transform.position.y;
-            sidemov.z = transform.position.z;
-            transform.position = sidemov;
-            isMiddle = false;
-            isLeft = true;
-            isRight = false;
-        }
-        if (isMiddle && (Input.GetKeyDown(KeyCode.RightArrow)))
-        {
-            sidemov.x = sidemov.x + 2f;
-            sidemov.y = transform.position.y;
-            sidemov.z = transform.position.z;
-            transform.position = sidemov;
-            isMiddle = false;
-            isRight = true;
-            isLeft = false;
-        }
-        if (isRight && (Input.GetKeyDown(KeyCode.LeftArrow)))
-        {
-            sidemov.x = sidemov.x - 2f;
-            sidemov.y = transform.position.y;
-            sidemov.z = transform.position.z;
-            transform.position = sidemov;
-            isMiddle = true;
-            isRight = false;
-            isLeft = false;
-        }
-        if (isLeft && (Input.GetKeyDown(KeyCode.RightArrow)))
-        {
-            sidemov.x = sidemov.x + 2f;
-            sidemov.y = transform.position.y;
-            sidemov.z = transform.position.z;
-            transform.position = sidemov;
-            isMiddle = true;
-            isLeft = false;
-            isRight = false;
-        }
+    }
+    void PlayerMover()
+    {
+        Vector3 targetPosition = transform.position;
+        targetPosition.z = LaneZPostition[LaneIndex];
+        Debug.Log(targetPosition);
+        transform.position = Vector3.Lerp(transform.position, targetPosition, SideSpeed * Time.deltaTime);
     }
     void OnCollisionEnter(Collision collisionInfo)
     {
